@@ -11,13 +11,16 @@ import {
   Fab,
   Button,
   IconButton,
+  Select,
+  MenuItem,
+  FormControl,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CommentIcon from "@mui/icons-material/Comment";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
 import CloseIcon from "@mui/icons-material/Close";
-import { formatDistanceToNow } from "date-fns"; // Import date-fns
+import { formatDistanceToNow } from "date-fns";
 import "./App.css";
 
 const default_user = {
@@ -36,6 +39,8 @@ const App = () => {
   const [commentContent, setCommentContent] = useState("");
   const [activePostId, setActivePostId] = useState(null);
   const [currentUser, setCurrentUser] = useState(default_user);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchType, setSearchType] = useState("all");
 
   useEffect(() => {
     const fetchUser = () => {
@@ -100,6 +105,19 @@ const App = () => {
     setPosts(updatedPosts);
   };
 
+  const filteredPosts = posts.filter((post) => {
+    if (searchType === "author") {
+      return post.author.toLowerCase().includes(searchQuery.toLowerCase());
+    } else if (searchType === "content") {
+      return post.content.toLowerCase().includes(searchQuery.toLowerCase());
+    } else {
+      return (
+        post.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.content.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+  });
+
   return (
     <div className="app-container">
       <header className="header">
@@ -107,12 +125,37 @@ const App = () => {
           TOBB Media
         </Typography>
         <Box display="flex" alignItems="center" gap={2}>
+          <TextField
+            className="search"
+            variant="outlined"
+            size="small"
+            placeholder="Search posts..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ flexGrow: 1 }}
+          />
+          <FormControl variant="outlined" size="small">
+            <Select
+              className="search"
+              value={searchType}
+              onChange={(e) => setSearchType(e.target.value)}
+            >
+              <MenuItem value="all">All</MenuItem>
+              <MenuItem value="author">Author</MenuItem>
+              <MenuItem value="content">Content</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+
+        <Box display="flex" alignItems="center" gap={2}>
           <Box>
             <Typography variant="body2">{`#${currentUser.ID}`}</Typography>
             <Typography variant="body2">{currentUser.title}</Typography>
           </Box>
           <Box>
-            <Typography variant="h6" className="header-title">{currentUser.name}</Typography>
+            <Typography variant="h6" className="header-title">
+              {currentUser.name}
+            </Typography>
             <Typography variant="body2">{currentUser.department}</Typography>
           </Box>
           <Avatar src={currentUser.profilePicture} alt={currentUser.name} />
@@ -128,32 +171,31 @@ const App = () => {
         >
           <AddIcon />
         </Fab>
-        {posts.length === 0 ? (
+        {filteredPosts.length === 0 ? (
           <Typography color="text.secondary" textAlign="center">
-            No posts yet.
+            No posts found.
           </Typography>
         ) : (
-          posts.map((post) => (
+          filteredPosts.map((post) => (
             <Card key={post.id} variant="outlined" className="post-card">
               <CardHeader
                 avatar={<Avatar>{post.avatar}</Avatar>}
                 title={
                   <Box>
                     <Typography variant="h6">{post.author}</Typography>
-                    <Typography variant="body2" color="textSecondary">{post.title}</Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {post.title}
+                    </Typography>
                   </Box>
                 }
                 subheader={`Posted ${formatDistanceToNow(post.time, { addSuffix: true })}`}
               />
               <CardContent>
                 <Typography variant="h6">{post.description}</Typography>
-                <Typography marginY={2}>{post.content}</Typography>
+                <Typography>{post.content}</Typography>
                 <Box className="post-actions">
                   <Box className="like-group" display="flex" alignItems="center">
-                    <IconButton
-                      color="primary"
-                      onClick={() => toggleLike(post.id)}
-                    >
+                    <IconButton color="primary" onClick={() => toggleLike(post.id)}>
                       {post.isLiked ? <ThumbUpIcon /> : <ThumbUpOutlinedIcon />}
                     </IconButton>
                     <Typography>{post.likes} Likes</Typography>
@@ -162,7 +204,9 @@ const App = () => {
                   <Box className="comment-group" display="flex" alignItems="center">
                     <IconButton
                       color="primary"
-                      onClick={() => setActivePostId(activePostId === post.id ? null : post.id)}
+                      onClick={() =>
+                        setActivePostId(activePostId === post.id ? null : post.id)
+                      }
                     >
                       <CommentIcon />
                     </IconButton>
@@ -180,9 +224,7 @@ const App = () => {
                     </Box>
                     <Box className="comments-list">
                       {post.comments.length === 0 ? (
-                        <Typography color="text.secondary">
-                          No comments yet.
-                        </Typography>
+                        <Typography color="text.secondary">No comments yet.</Typography>
                       ) : (
                         post.comments.map((comment, index) => (
                           <Box
@@ -190,7 +232,6 @@ const App = () => {
                             className="comment-item"
                             display="flex"
                             alignItems="center"
-                            marginY={1}
                           >
                             <Avatar
                               style={{
@@ -201,14 +242,10 @@ const App = () => {
                               {comment.author.charAt(0).toUpperCase()}
                             </Avatar>
                             <Box>
-                              <Typography fontWeight="bold">
-                                {comment.author}
-                              </Typography>
-                              <Typography variant="body2">
-                                {comment.content}
-                              </Typography>
+                              <Typography fontWeight="bold">{comment.author}</Typography>
+                              <Typography variant="body2">{comment.content}</Typography>
                               <Typography variant="caption" color="textSecondary">
-                                {formatDistanceToNow(new Date(comment.time), { addSuffix: true })} {/* Relative time */}
+                                {formatDistanceToNow(new Date(comment.time), { addSuffix: true })}
                               </Typography>
                             </Box>
                           </Box>
@@ -223,11 +260,7 @@ const App = () => {
                         value={commentContent}
                         onChange={(e) => setCommentContent(e.target.value)}
                       />
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => addComment(post.id)}
-                      >
+                      <Button variant="contained" color="primary" onClick={() => addComment(post.id)}>
                         Add
                       </Button>
                     </Box>
@@ -246,9 +279,7 @@ const App = () => {
         aria-describedby="create-post-modal-description"
       >
         <Box className="modal-box">
-          <Typography variant="h6" marginBottom={2}>
-            Create a Post
-          </Typography>
+          <Typography variant="h6">Create a Post</Typography>
           <TextField
             fullWidth
             placeholder="Post Description"
@@ -268,10 +299,7 @@ const App = () => {
             <button className="submit-button" onClick={addPost}>
               Post
             </button>
-            <button
-              className="cancel-button"
-              onClick={() => setIsModalOpen(false)}
-            >
+            <button className="cancel-button" onClick={() => setIsModalOpen(false)}>
               Cancel
             </button>
           </Box>
