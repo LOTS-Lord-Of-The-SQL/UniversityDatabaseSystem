@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Avatar,
   Card,
@@ -13,35 +13,56 @@ import {
   IconButton,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import PersonIcon from "@mui/icons-material/Person";
 import CommentIcon from "@mui/icons-material/Comment";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
 import CloseIcon from "@mui/icons-material/Close";
+import { formatDistanceToNow } from "date-fns"; // Import date-fns
 import "./App.css";
 
-const App = () => {
-  const [posts, setPosts] = useState([]); // List of posts
-  const [content, setContent] = useState(""); // Content of the new post
-  const [description, setDescription] = useState(""); // Description of the new post
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility
-  const [commentContent, setCommentContent] = useState(""); // Comment content
-  const [activePostId, setActivePostId] = useState(null); // Track active post for comments
-  const [currentUser, setCurrentUser] = useState("Anonymous User"); // Simulated current user
+const default_user = {
+  name: "Anonymous User",
+  ID: "ID",
+  department: "DepartmentName",
+  profilePicture: "/path/to/profile.jpg",
+  title: "Title",
+};
 
-  // Add a new post
+const App = () => {
+  const [posts, setPosts] = useState([]);
+  const [content, setContent] = useState("");
+  const [description, setDescription] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [commentContent, setCommentContent] = useState("");
+  const [activePostId, setActivePostId] = useState(null);
+  const [currentUser, setCurrentUser] = useState(default_user);
+
+  useEffect(() => {
+    const fetchUser = () => {
+      setCurrentUser({
+        name: "UserName",
+        ID: "UserID",
+        department: "DepartmentName",
+        profilePicture: "/path/to/profile.jpg",
+        title: "Title",
+      });
+    };
+    fetchUser();
+  }, []);
+
   const addPost = () => {
-    if (content.trim() === "" || description.trim() === "") return; // Prevent empty content or description
+    if (content.trim() === "" || description.trim() === "") return;
     const newPost = {
       id: posts.length + 1,
-      author: "Lord of the SQL",
-      avatar: <PersonIcon />, // Default profile icon
+      author: currentUser.name,
+      title: currentUser.title,
+      avatar: <Avatar src={currentUser.profilePicture} alt={currentUser.name} />,
       content,
       description,
-      time: new Date().toLocaleString(), // Add posting time
-      likes: 0, // Initial likes
-      isLiked: false, // Like status
-      comments: [], // Comments array
+      time: new Date(),
+      likes: 0,
+      isLiked: false,
+      comments: [],
     };
     setPosts([newPost, ...posts]);
     setContent("");
@@ -49,13 +70,12 @@ const App = () => {
     setIsModalOpen(false);
   };
 
-  // Add a comment to a post
   const addComment = (postId) => {
-    if (commentContent.trim() === "") return; // Prevent empty comments
+    if (commentContent.trim() === "") return;
     const newComment = {
-      author: currentUser, // Add the name of the commenter
+      author: currentUser.name,
       content: commentContent,
-      time: new Date().toLocaleString(), // Timestamp for the comment
+      time: new Date(),
     };
 
     const updatedPosts = posts.map((post) =>
@@ -64,10 +84,9 @@ const App = () => {
         : post
     );
     setPosts(updatedPosts);
-    setCommentContent(""); // Clear comment field
+    setCommentContent("");
   };
 
-  // Toggle likes
   const toggleLike = (postId) => {
     const updatedPosts = posts.map((post) =>
       post.id === postId
@@ -83,14 +102,23 @@ const App = () => {
 
   return (
     <div className="app-container">
-      {/* Fixed Header Section */}
       <header className="header">
         <Typography variant="h4" className="header-title">
           TOBB Media
         </Typography>
+        <Box display="flex" alignItems="center" gap={2}>
+          <Box>
+            <Typography variant="body2">{`#${currentUser.ID}`}</Typography>
+            <Typography variant="body2">{currentUser.title}</Typography>
+          </Box>
+          <Box>
+            <Typography variant="h6" className="header-title">{currentUser.name}</Typography>
+            <Typography variant="body2">{currentUser.department}</Typography>
+          </Box>
+          <Avatar src={currentUser.profilePicture} alt={currentUser.name} />
+        </Box>
       </header>
 
-      {/* Scrollable Posts Section */}
       <div className="post-container">
         <Fab
           color="primary"
@@ -109,8 +137,13 @@ const App = () => {
             <Card key={post.id} variant="outlined" className="post-card">
               <CardHeader
                 avatar={<Avatar>{post.avatar}</Avatar>}
-                title={post.author}
-                subheader={`Posted at: ${post.time}`}
+                title={
+                  <Box>
+                    <Typography variant="h6">{post.author}</Typography>
+                    <Typography variant="body2" color="textSecondary">{post.title}</Typography>
+                  </Box>
+                }
+                subheader={`Posted ${formatDistanceToNow(post.time, { addSuffix: true })}`}
               />
               <CardContent>
                 <Typography variant="h6">{post.description}</Typography>
@@ -137,7 +170,6 @@ const App = () => {
                   </Box>
                 </Box>
 
-                {/* Show comments only if active */}
                 {activePostId === post.id && (
                   <Box className="comments-container">
                     <Box display="flex" justifyContent="space-between">
@@ -176,7 +208,7 @@ const App = () => {
                                 {comment.content}
                               </Typography>
                               <Typography variant="caption" color="textSecondary">
-                                {comment.time}
+                                {formatDistanceToNow(new Date(comment.time), { addSuffix: true })} {/* Relative time */}
                               </Typography>
                             </Box>
                           </Box>
@@ -207,7 +239,6 @@ const App = () => {
         )}
       </div>
 
-      {/* Modal for Post Creation */}
       <Modal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
