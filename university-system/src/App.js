@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Avatar,
   Card,
@@ -9,50 +9,125 @@ import {
   Modal,
   Box,
   Fab,
+  Button,
+  IconButton,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add"; // "+" icon
-import PersonIcon from "@mui/icons-material/Person"; // Person icon for profile picture
+import AddIcon from "@mui/icons-material/Add";
+import CommentIcon from "@mui/icons-material/Comment";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
+import CloseIcon from "@mui/icons-material/Close";
+import { formatDistanceToNow } from "date-fns"; // Import date-fns
 import "./App.css";
 
-const App = () => {
-  const [posts, setPosts] = useState([]); // List of posts
-  const [content, setContent] = useState(""); // Content of the new post
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility
+const default_user = {
+  name: "Anonymous User",
+  ID: "ID",
+  department: "DepartmentName",
+  profilePicture: "/path/to/profile.jpg",
+  title: "Title",
+};
 
-  // Add a new post
+const App = () => {
+  const [posts, setPosts] = useState([]);
+  const [content, setContent] = useState("");
+  const [description, setDescription] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [commentContent, setCommentContent] = useState("");
+  const [activePostId, setActivePostId] = useState(null);
+  const [currentUser, setCurrentUser] = useState(default_user);
+
+  useEffect(() => {
+    const fetchUser = () => {
+      setCurrentUser({
+        name: "UserName",
+        ID: "UserID",
+        department: "DepartmentName",
+        profilePicture: "/path/to/profile.jpg",
+        title: "Title",
+      });
+    };
+    fetchUser();
+  }, []);
+
   const addPost = () => {
-    if (content.trim() === "") return; // Prevent empty content
+    if (content.trim() === "" || description.trim() === "") return;
     const newPost = {
       id: posts.length + 1,
-      author: "Lord of the SQL",
-      avatar: <PersonIcon />, // Default profile icon
-      description: "Best Team of All",
+      author: currentUser.name,
+      title: currentUser.title,
+      avatar: <Avatar src={currentUser.profilePicture} alt={currentUser.name} />,
       content,
+      description,
+      time: new Date(),
+      likes: 0,
+      isLiked: false,
+      comments: [],
     };
     setPosts([newPost, ...posts]);
     setContent("");
+    setDescription("");
     setIsModalOpen(false);
+  };
+
+  const addComment = (postId) => {
+    if (commentContent.trim() === "") return;
+    const newComment = {
+      author: currentUser.name,
+      content: commentContent,
+      time: new Date(),
+    };
+
+    const updatedPosts = posts.map((post) =>
+      post.id === postId
+        ? { ...post, comments: [...post.comments, newComment] }
+        : post
+    );
+    setPosts(updatedPosts);
+    setCommentContent("");
+  };
+
+  const toggleLike = (postId) => {
+    const updatedPosts = posts.map((post) =>
+      post.id === postId
+        ? {
+          ...post,
+          likes: post.isLiked ? post.likes - 1 : post.likes + 1,
+          isLiked: !post.isLiked,
+        }
+        : post
+    );
+    setPosts(updatedPosts);
   };
 
   return (
     <div className="app-container">
-      {/* Fixed Header Section */}
       <header className="header">
         <Typography variant="h4" className="header-title">
           TOBB Media
         </Typography>
+        <Box display="flex" alignItems="center" gap={2}>
+          <Box>
+            <Typography variant="body2">{`#${currentUser.ID}`}</Typography>
+            <Typography variant="body2">{currentUser.title}</Typography>
+          </Box>
+          <Box>
+            <Typography variant="h6" className="header-title">{currentUser.name}</Typography>
+            <Typography variant="body2">{currentUser.department}</Typography>
+          </Box>
+          <Avatar src={currentUser.profilePicture} alt={currentUser.name} />
+        </Box>
+      </header>
+
+      <div className="post-container">
         <Fab
           color="primary"
           aria-label="add"
           onClick={() => setIsModalOpen(true)}
-          className="header-button"
+          className="createpost-button"
         >
           <AddIcon />
         </Fab>
-      </header>
-
-      {/* Scrollable Posts Section */}
-      <div className="post-container">
         {posts.length === 0 ? (
           <Typography color="text.secondary" textAlign="center">
             No posts yet.
@@ -61,19 +136,109 @@ const App = () => {
           posts.map((post) => (
             <Card key={post.id} variant="outlined" className="post-card">
               <CardHeader
-                avatar={<Avatar>{post.avatar}</Avatar>} // Use the Person icon as avatar
-                title={post.author}
-                subheader={post.description}
+                avatar={<Avatar>{post.avatar}</Avatar>}
+                title={
+                  <Box>
+                    <Typography variant="h6">{post.author}</Typography>
+                    <Typography variant="body2" color="textSecondary">{post.title}</Typography>
+                  </Box>
+                }
+                subheader={`Posted ${formatDistanceToNow(post.time, { addSuffix: true })}`}
               />
               <CardContent>
-                <Typography>{post.content}</Typography>
+                <Typography variant="h6">{post.description}</Typography>
+                <Typography marginY={2}>{post.content}</Typography>
+                <Box className="post-actions">
+                  <Box className="like-group" display="flex" alignItems="center">
+                    <IconButton
+                      color="primary"
+                      onClick={() => toggleLike(post.id)}
+                    >
+                      {post.isLiked ? <ThumbUpIcon /> : <ThumbUpOutlinedIcon />}
+                    </IconButton>
+                    <Typography>{post.likes} Likes</Typography>
+                  </Box>
+
+                  <Box className="comment-group" display="flex" alignItems="center">
+                    <IconButton
+                      color="primary"
+                      onClick={() => setActivePostId(activePostId === post.id ? null : post.id)}
+                    >
+                      <CommentIcon />
+                    </IconButton>
+                    <Typography>{post.comments.length} Comments</Typography>
+                  </Box>
+                </Box>
+
+                {activePostId === post.id && (
+                  <Box className="comments-container">
+                    <Box display="flex" justifyContent="space-between">
+                      <Typography variant="h6">Comments</Typography>
+                      <IconButton onClick={() => setActivePostId(null)}>
+                        <CloseIcon />
+                      </IconButton>
+                    </Box>
+                    <Box className="comments-list">
+                      {post.comments.length === 0 ? (
+                        <Typography color="text.secondary">
+                          No comments yet.
+                        </Typography>
+                      ) : (
+                        post.comments.map((comment, index) => (
+                          <Box
+                            key={index}
+                            className="comment-item"
+                            display="flex"
+                            alignItems="center"
+                            marginY={1}
+                          >
+                            <Avatar
+                              style={{
+                                backgroundColor: "#1976d2",
+                                marginRight: "10px",
+                              }}
+                            >
+                              {comment.author.charAt(0).toUpperCase()}
+                            </Avatar>
+                            <Box>
+                              <Typography fontWeight="bold">
+                                {comment.author}
+                              </Typography>
+                              <Typography variant="body2">
+                                {comment.content}
+                              </Typography>
+                              <Typography variant="caption" color="textSecondary">
+                                {formatDistanceToNow(new Date(comment.time), { addSuffix: true })} {/* Relative time */}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        ))
+                      )}
+                    </Box>
+                    <Box className="comment-input">
+                      <TextField
+                        fullWidth
+                        size="small"
+                        placeholder="Write a comment..."
+                        value={commentContent}
+                        onChange={(e) => setCommentContent(e.target.value)}
+                      />
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => addComment(post.id)}
+                      >
+                        Add
+                      </Button>
+                    </Box>
+                  </Box>
+                )}
               </CardContent>
             </Card>
           ))
         )}
       </div>
 
-      {/* Modal for Post Creation */}
       <Modal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -84,6 +249,13 @@ const App = () => {
           <Typography variant="h6" marginBottom={2}>
             Create a Post
           </Typography>
+          <TextField
+            fullWidth
+            placeholder="Post Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            margin="normal"
+          />
           <TextField
             fullWidth
             multiline
