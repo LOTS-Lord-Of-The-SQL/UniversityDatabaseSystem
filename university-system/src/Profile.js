@@ -1,18 +1,20 @@
 import React from "react";
-import { Avatar, Typography, Box } from "@mui/material";
+import { Box, Typography, Avatar } from "@mui/material";
 
-const Profile = ({ user }) => {
+const Profile = ({ currentUser }) => {
   return (
-    <Box className="profile-container" textAlign="center" padding={4}>
-      <Avatar src={user.profilePicture} alt={user.name} style={{ width: 100, height: 100, margin: "0 auto" }} />
-      <Typography variant="h5">{user.name}</Typography>
-      <Typography variant="body1">{user.title}</Typography>
-      <Typography variant="body2" color="textSecondary">
-        ID: {user.ID}
+    <Box padding={3} display="flex" flexDirection="column" alignItems="center">
+      <Avatar
+        src={currentUser.profilePicture}
+        alt={currentUser.name}
+        style={{ width: 120, height: 120 }}
+      />
+      <Typography variant="h5" marginTop={2}>
+        {currentUser.name}
       </Typography>
-      <Typography variant="body2" color="textSecondary">
-        Department: {user.department}
-      </Typography>
+      <Typography variant="body1">{`ID: ${currentUser.ID}`}</Typography>
+      <Typography variant="body2">{currentUser.title}</Typography>
+      <Typography variant="body2">{currentUser.department}</Typography>
     </Box>
   );
 };
