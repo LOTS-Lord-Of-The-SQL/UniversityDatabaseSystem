@@ -1,9 +1,12 @@
+from django.forms import ValidationError
 from rest_framework.views import APIView
 from . models import *
 from rest_framework.response import Response
 from .serializers import *
 from rest_framework import status
 from rest_framework.exceptions import NotFound
+from django.core.exceptions import ObjectDoesNotExist
+
 
 
 
@@ -72,3 +75,30 @@ class CoursePostsView(APIView):
             "course_name": course.course_name,
             "posts": posts_data
         }, status=status.HTTP_200_OK)
+
+class EnrollCourseView(APIView):
+    def post(self, request, *args, **kwargs):
+        user_id = request.data.get('user_id')
+        course_id = request.data.get('course_id')
+
+        if not user_id or not course_id:
+            raise ValidationError("Kullanıcı ID ve Kurs ID'si gerekli.")
+
+        try:
+            user = User.objects.get(id=user_id)
+        except ObjectDoesNotExist:
+            return Response({"error": "Kullanıcı bulunamadı."}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            course = Courses.objects.get(course_id=course_id)
+        except ObjectDoesNotExist:
+            return Response({"error": "Kurs bulunamadı."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Kullanıcının kursa zaten kaydolup kaydolmadığını kontrol et
+        if CourseEnrollment.objects.filter(course=course, user=user).exists():
+            return Response({"message": "Kullanıcı bu kursa zaten kayıtlı."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Yeni CourseEnrollment kaydı oluştur
+        CourseEnrollment.objects.create(course=course, user=user)
+
+        return Response({"message": f"{user.username} kursa başarıyla kaydedildi."}, status=status.HTTP_200_CREATED)
