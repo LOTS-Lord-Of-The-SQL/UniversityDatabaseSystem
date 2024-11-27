@@ -4,6 +4,15 @@ from . models import *
 
 from django.contrib.auth import authenticate
 
+class ListCoursesSerializer(serializers.Serializer):
+    id = serializers.DecimalField(max_digits=10, decimal_places=0)
+
+    def validate(self, attrs):
+        user_id = attrs.get('id')  # Gönderilen id'yi al
+        if not User.objects.filter(id=user_id).exists():  # Kullanıcı var mı kontrol et
+            raise serializers.ValidationError("Bu ID'ye sahip bir kullanıcı bulunamadı.")
+        return attrs 
+
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
