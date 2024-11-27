@@ -197,3 +197,52 @@ class CreateCommentView(APIView):
             "context": comment.context,
             "created_at": comment.created_at
         }, status=status.HTTP_201_CREATED)
+    
+
+class JoinCommunity(APIView):
+    def post(self, request, *args, **kwargs):
+        # Extract data from request
+        community_id = request.data.get('community_id')
+        user_id = request.data.get('user_id')
+        position = request.data.get('position', 'Member')  # Default position: Member
+        breakpoint()
+        # Validate if the community exists
+        try:
+            community = Community.objects.get(community_id=community_id)
+        except Community.DoesNotExist:
+            return Response(
+                {"error": "Community does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Validate if the user exists
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "User does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Check if the user has already joined the community
+        if CommunityJoin.objects.filter(community=community, user=user).exists():
+            return Response(
+                {"error": "User already joined this community."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Create a new CommunityJoin record
+        join_entry = CommunityJoin.objects.create(
+            community=community,
+            user=user,
+            position=position,
+        )
+
+        # Return success response with the new join entry ID
+        return Response(
+            {
+                "message": "User successfully joined the community.",
+                "join_id": join_entry.id,
+            },
+            status=status.HTTP_201_CREATED,
+        )
