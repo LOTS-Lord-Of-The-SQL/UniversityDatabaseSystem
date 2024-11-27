@@ -164,3 +164,36 @@ class CreatePostView(APIView):
         post_serializer = PostSerializer(post)
 
         return Response(post_serializer.data, status=status.HTTP_201_CREATED)
+    
+class CreateCommentView(APIView):
+    def post(self, request, *args, **kwargs):
+        # İstekten gelen verileri al
+        user_id = request.data.get('user_id')
+        post_id = request.data.get('post_id')
+        context = request.data.get('context')
+
+        # Kullanıcı ve post nesnelerini al
+        user = User.objects.filter(id=user_id).first()
+        post = Post.objects.filter(post_id=post_id).first()
+
+        # Kullanıcı ve post bulunamazsa hata döndür
+        if not user:
+            return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if not post:
+            return Response({"detail": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Yeni yorum oluştur
+        comment = Comments.objects.create(
+            owner=user,
+            post=post,
+            context=context
+        )
+
+        # Yorum oluşturulduktan sonra döndürülecek veriyi hazırlayalım
+        return Response({
+            "owner": user.id,
+            "post": post.post_id,
+            "context": comment.context,
+            "created_at": comment.created_at
+        }, status=status.HTTP_201_CREATED)
