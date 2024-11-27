@@ -45,3 +45,30 @@ class ListCoursesView(APIView):
 
         return Response({"user_id": user_id, "courses": courses}, status=status.HTTP_200_OK)
         
+
+class CoursePostsView(APIView):
+    def get(self, request, course_id, *args, **kwargs):
+        try:
+            course = Courses.objects.get(course_id=course_id)  # Kursu al
+        except Courses.DoesNotExist:
+            raise NotFound("Bu ID'ye sahip bir kurs bulunamadı.")
+
+        # Kursa ait tüm postları al
+        posts = Post.objects.filter(owner_course=course)
+        posts_data = [
+            {
+                "post_id": post.post_id,
+                "owner": post.owner.username,
+                "is_official": post.is_official,
+                "post_description": post.post_description,
+                "header": post.header,
+                "created_at": post.created_at,
+            }
+            for post in posts
+        ]
+
+        return Response({
+            "course_id": course_id,
+            "course_name": course.course_name,
+            "posts": posts_data
+        }, status=status.HTTP_200_OK)
