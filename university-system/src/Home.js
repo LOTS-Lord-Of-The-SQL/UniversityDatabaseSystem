@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useContext, useState, useEffect } from "react";
 import {
   Avatar,
+  AppBar,
+  Toolbar,
   Card,
   CardContent,
   CardHeader,
@@ -14,7 +17,13 @@ import {
   Select,
   MenuItem,
   FormControl,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  
 } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
 import AddIcon from "@mui/icons-material/Add";
 import CommentIcon from "@mui/icons-material/Comment";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
@@ -22,6 +31,8 @@ import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import { formatDistanceToNow } from "date-fns";
 import "./Home.css";
+import { UserContext } from "./UserContext";
+import { SelectedContext } from "./SelectedContext";
 
 const default_user = {
   name: "Anonymous User",
@@ -32,23 +43,11 @@ const default_user = {
 };
 
 const Home = () => {
-
-  const [currentUser, setCurrentUser] = useState(default_user);
+  const { currentUser } = useContext(UserContext);
+  const { selectedCourse, setSelectedCourse } = useContext(SelectedContext);
+  //const [currentUser, setCurrentUser] = useState(default_user);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchType, setSearchType] = useState("all");
-
-  useEffect(() => {
-    const fetchUser = () => {
-      setCurrentUser({
-        name: "UserName",
-        ID: "UserID",
-        department: "DepartmentName",
-        profilePicture: "/path/to/profile.jpg",
-        title: "Title",
-      });
-    };
-    fetchUser();
-  }, []);
 
   const [posts, setPosts] = useState([]);
   const [content, setContent] = useState("");
@@ -57,9 +56,10 @@ const Home = () => {
   const [commentContent, setCommentContent] = useState("");
   const [activePostId, setActivePostId] = useState(null);
 
-  console.log("currentUser:", currentUser);
+  console.log("Homeeee currentUser:", currentUser);
 
-
+ // Drawer (Navbar) için state
+ const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const addPost = () => {
     if (content.trim() === "" || description.trim() === "") return;
@@ -124,54 +124,81 @@ const Home = () => {
     }
   });
 
+  const selectednull = () => {
+    setSelectedCourse(null);
+    window.location = "/home";
+  }; 
+
+  const toggleDrawer = (open) => () => {
+    setIsDrawerOpen(open);
+  };
+
   return (
     <div className="app-container">
 
-      <header className="header">
-        <Typography variant="h4" className="header-title" onClick={() => (window.location = "/")}>
-          TOBB Media
-        </Typography>
-        <Box display="flex" alignItems="center" gap={2}>
-          <TextField
-            className="search"
-            variant="outlined"
-            size="small"
-            placeholder="Search posts..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ flexGrow: 1 }}
-          />
-          <FormControl variant="outlined" size="small">
-            <Select
+      <AppBar position="sticky" color="primary" className="header">
+        <Toolbar>
+          {/* Hamburger Menü Butonu */}
+          <IconButton
+            color="inherit"
+            edge="start"
+            onClick={toggleDrawer(true)}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography
+            variant="h6"
+            className="header-title"
+            onClick={selectednull}
+          >
+            TOBB Media
+          </Typography>
+          <Box display="flex" alignItems="center" gap={2} flexGrow={1} justifyContent={"center"}>
+          {selectedCourse != null && (
+              <Typography variant="h6" className="header-course-name" style={{ marginLeft: 8 }}>
+                {selectedCourse}
+              </Typography>
+            )}
+            <TextField
               className="search"
-              value={searchType}
-              onChange={(e) => setSearchType(e.target.value)}
-            >
-              <MenuItem value="all">All</MenuItem>
-              <MenuItem value="author">Author</MenuItem>
-              <MenuItem value="content">Content</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-        <Box display="flex" alignItems="center" gap={2}>
-          <Box>
-            <Typography variant="body2">{`#${currentUser.ID}`}</Typography>
-            <Typography variant="body2">{currentUser.title}</Typography>
+              variant="outlined"
+              size="small"
+              placeholder="Search posts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <FormControl variant="outlined" size="small">
+              <Select
+                className="search"
+                value={searchType}
+                onChange={(e) => setSearchType(e.target.value)}
+              >
+                <MenuItem value="all">All</MenuItem>
+                <MenuItem value="author">Author</MenuItem>
+                <MenuItem value="content">Content</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
-          <Box>
-            <Typography variant="h6" className="header-title">
-              {currentUser.name}
-            </Typography>
-            <Typography variant="body2">{currentUser.department}</Typography>
+          <Box display="flex" alignItems="center" gap={2}>
+            <Box>
+              <Typography variant="body2">{currentUser.username}</Typography>
+              <Typography variant="body2">{`#${currentUser.id}`}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="body2">{currentUser.role}</Typography>
+              <Typography variant="body2">{`#${currentUser.department}`}</Typography>
+            </Box>
+            <Avatar
+              src={currentUser.profilePicture}
+              alt={currentUser.username}
+              style={{ cursor: "pointer" }}
+              onClick={() => (window.location = "/profile")}
+            />
           </Box>
-          <Avatar
-            src={currentUser.profilePicture}
-            alt={currentUser.name}
-            style={{ cursor: "pointer" }}
-            onClick={() => (window.location = "/profile")}
-          />
-        </Box>
-      </header>
+        </Toolbar>
+      </AppBar>
+
+
 
       <div className="post-container">
         <Fab
@@ -282,7 +309,27 @@ const Home = () => {
           ))
         )}
       </div>
-
+        {/* Sol Drawer (Navigasyon Çubuğu) */}
+      <Drawer open={isDrawerOpen} onClose={toggleDrawer(false)}>
+        <Box
+          role="presentation"
+          onClick={toggleDrawer(false)}
+          onKeyDown={toggleDrawer(false)}
+          style={{ width: 250 }}
+        >
+          <List>
+            <ListItem button onClick={() => (window.location = "/enrollcourse")}>
+              <ListItemText primary="Enroll Course" />
+            </ListItem>
+            <ListItem button onClick={() => (window.location = "/enrollcommunity")}>
+              <ListItemText primary="Enroll Community" />
+            </ListItem>
+            <ListItem button onClick={() => (window.location = "/reservefacility")}>
+              <ListItemText primary="Reserve Facility" />
+            </ListItem>
+          </List>
+        </Box>
+      </Drawer>
       <Modal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}

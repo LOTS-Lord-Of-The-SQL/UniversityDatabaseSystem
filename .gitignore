@@ -1,0 +1,12 @@
+# Ignore env directory
+env/
+
+# Ignore university_system directory
+university_system/
+
+# Other common ignores
+*.log
+*.pyc
+__pycache__/
+.vscode/
+.DS_Store
