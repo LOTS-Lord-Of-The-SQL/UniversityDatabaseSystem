@@ -1,4 +1,5 @@
 from django.forms import ValidationError
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from . models import *
 from rest_framework.response import Response
@@ -102,3 +103,29 @@ class EnrollCourseView(APIView):
         CourseEnrollment.objects.create(course=course, user=user)
 
         return Response({"message": f"{user.username} kursa başarıyla kaydedildi."}, status=status.HTTP_200_CREATED)
+
+
+class PostDetailView(APIView):
+    def get(self, request, post_id, *args, **kwargs):
+        # Postu getir
+        post = get_object_or_404(Post, post_id=post_id)
+        
+        # Yorumları getir
+        comments = Comments.objects.filter(post=post)
+        
+        # Beğenileri getir
+        likes = Likes.objects.filter(post=post)
+        
+        # Yorumları ve Beğenileri serileştir
+        comments_serializer = CommentsSerializer(comments, many=True)
+        likes_serializer = LikesSerializer(likes, many=True)
+
+        # Postu serileştir
+        post_serializer = PostSerializer(post)
+
+        # Yanıt olarak post, yorumlar ve beğenileri gönder
+        return Response({
+            'post': post_serializer.data,
+            'comments': comments_serializer.data,
+            'likes': likes_serializer.data,
+        }, status=status.HTTP_200_OK)
