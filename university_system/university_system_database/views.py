@@ -129,3 +129,38 @@ class PostDetailView(APIView):
             'comments': comments_serializer.data,
             'likes': likes_serializer.data,
         }, status=status.HTTP_200_OK)
+
+
+class CreatePostView(APIView):
+    def post(self, request, *args, **kwargs):
+        # İstekten gelen verileri al
+        user_id = request.data.get('user_id')
+        course_id = request.data.get('course_id')
+        header = request.data.get('header')
+        post_description = request.data.get('post_description')
+        is_official = request.data.get('is_official', False)  # Varsayılan olarak False
+
+        # User ve Course nesnelerini veritabanından al
+        user = User.objects.filter(id=user_id).first()
+        course = Courses.objects.filter(course_id=course_id).first()
+
+        # Kullanıcı ve kurs bulunamazsa hata döndür
+        if not user:
+            return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if not course:
+            return Response({"detail": "Course not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Yeni post oluştur
+        post = Post.objects.create(
+            owner=user,
+            owner_course=course,
+            is_official=is_official,
+            post_description=post_description,
+            header=header
+        )
+
+        # Post oluşturulduktan sonra döndürülecek veriyi hazırlayalım
+        post_serializer = PostSerializer(post)
+
+        return Response(post_serializer.data, status=status.HTTP_201_CREATED)
