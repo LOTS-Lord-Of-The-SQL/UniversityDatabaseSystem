@@ -9,5 +9,8 @@ urlpatterns = [
     path('post-detail-<int:post_id>/', views.PostDetailView.as_view(), name='post-detail'),
     path('create-post', views.CreatePostView.as_view(), name='create-post'),
     path('create-comment', views.CreateCommentView.as_view(), name='create-comment'),
-    path('join-community', views.JoinCommunity.as_view(), name='join-community')
+    path('join-community', views.JoinCommunityView.as_view(), name='join-community'),
+    path('list-communities', views.ListCommunitiesView.as_view(), name='list-communities'),
+    path('reserve-facility', views.ReserveFacilityView.as_view(), name='reserve-facility'),
+    path('list-facilities', views.ListFacilitiesView.as_view(), name='list-facilities')
 ]

@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
@@ -199,7 +200,7 @@ class CreateCommentView(APIView):
         }, status=status.HTTP_201_CREATED)
     
 
-class JoinCommunity(APIView):
+class JoinCommunityView(APIView):
     def post(self, request, *args, **kwargs):
         # Extract data from request
         community_id = request.data.get('community_id')
@@ -246,3 +247,109 @@ class JoinCommunity(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
+    
+class ListCommunitiesView(APIView):
+    def post(self, request, *args, **kwargs):
+        # Extract the user ID from the request
+        user_id = request.data.get('user_id')
+
+        # Validate if the user exists
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "User does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Get the list of communities the user has joined
+        joined_communities = CommunityJoin.objects.filter(user=user).select_related('community')
+
+        # Check if the user is enrolled in any communities
+        if not joined_communities.exists():
+            return Response(
+                {"message": "User has not joined any communities."},
+                status=status.HTTP_200_OK,
+            )
+
+        # Prepare the list of community names
+        communities_data = [
+            {"community_id": join.community.community_id, "community_name": join.community.community_name}
+            for join in joined_communities
+        ]
+
+        return Response(
+            {"communities": communities_data},
+            status=status.HTTP_200_OK,)
+    
+class ReserveFacilityView(APIView):
+    def post(self, request, *args, **kwargs):
+        # Extract data from the request
+        facility_id = request.data.get('facility_id')
+        user_id = request.data.get('user_id')
+
+        try:
+            # Fetch the facility and user instances
+            facility = Facilities.objects.get(facilities_id=facility_id)
+            user = User.objects.get(id=user_id)
+
+            # Get the current date (only the date, without time)
+            current_date = timezone.now().date()
+
+            # Check if the facility is already reserved by the user on the specified date
+            if Reservation.objects.filter(facility=facility, reserve_user=user, date__date=current_date).exists():
+                return Response(
+                    {"error": "You have already reserved this facility on this date."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Check if the facility is already reserved by another user on the specified date
+            if Reservation.objects.filter(facility=facility, date__date=current_date).exists():
+                return Response(
+                    {"error": "This facility is already reserved on the specified date."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Create the reservation
+            reservation = Reservation.objects.create(
+                facility=facility,
+                reserve_user=user,
+                date=timezone.now(),  # Save the full datetime, but compare only by date
+            )
+
+            # Return success response
+            return Response(
+                {"message": "Facility successfully reserved.", "reservation_id": reservation.id},
+                status=status.HTTP_201_CREATED,
+            )
+
+        except Facilities.DoesNotExist:
+            return Response(
+                {"error": "Facility does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        except User.DoesNotExist:
+            return Response(
+                {"error": "User does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        except Exception as e:
+            # General error handling
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class ListFacilitiesView(APIView):
+    def get(self, request, *args, **kwargs):
+        # Retrieve all facilities
+        facilities = Facilities.objects.all()
+
+        # Serialize the facilities
+        serializer = FacilitiesSerializer(facilities, many=True)
+
+        # Return the serialized data in the response
+        return Response(serializer.data, status=status.HTTP_200_OK)
