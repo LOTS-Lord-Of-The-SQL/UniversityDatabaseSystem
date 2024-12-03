@@ -1,184 +1,230 @@
+/* General Layout */
 body {
-    margin: 0;
-    font-family: "Roboto", "Arial", sans-serif;
-    background-color: #f5f5f5;
-    overflow: hidden;
-  }
-  
-  .app-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-  }
-  
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: #1976d2;
-    color: white;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  
-  .header-title {
-    font-weight: bold;
-  }
-  
-  .post-container {
-    flex: 1;
-    overflow-y: auto;
-    background-color: #f5f5f5;
-    margin: 10px;
-  }
-  
-  .post-container .createpost-button {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-  }
-  
-  .post-card {
-    width: 60%;
-    margin: 10px auto;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    background-color: #ffffff;
-  }
-  
-  .post-card .MuiTypography-h6 {
-    font-size: 1rem;
-    font-weight: bold;
-  }
-  
-  .post-card .MuiTypography-body2 {
-    font-size: 0.875rem;
-    line-height: 1.5;
-  }
-  
-  .post-actions {
-    padding-top: 10px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-  
-  .post-actions .MuiIconButton-root {
-    padding: 5px;
-  }
-  
-  .post-actions .MuiTypography-root {
-    margin-left: 5px;
-    font-size: 0.875rem;
-  }
-  
-  .comments-container {
-    padding: 10px;
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .comments-list {
-    max-height: 150px;
-    overflow-y: auto;
-  }
-  
-  .comment-item {
-    display: flex;
-    align-items: flex-start;
-    padding: 5px 0;
-    border-bottom: 1px solid #e0e0e0;
-  }
-  
-  .comment-item:last-child {
-    border-bottom: none;
-  }
-  
-  .comment-item .MuiAvatar-root {
-    width: 40px;
-    height: 40px;
-    font-size: 1rem;
-    background-color: #1976d2;
-    color: white;
-    margin-right: 10px;
-  }
-  
-  .comment-item .comment-author {
-    font-weight: bold;
-  }
-  
-  .comment-item .comment-time {
-    font-size: 0.75rem;
-    color: gray;
-  }
-  
-  .comment-input {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 10px;
-  }
-  
-  .comment-input .MuiTextField-root {
-    flex: 1;
-    font-size: 0.875rem;
-  }
-  
-  .comment-input .MuiButton-root {
-    height: 40px;
-    font-size: 0.875rem;
-  }
-  
-  .modal-box {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 400px;
-    background-color: #fff;
-    box-shadow: 24px 24px 24px rgba(0, 0, 0, 0.2);
-    padding: 20px;
-    border-radius: 10px;
-  }
-  
-  .modal-actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-  }
-  
-  .submit-button {
-    background-color: #1976d2;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.875rem;
-  }
-  
-  .cancel-button {
-    background-color: #e0e0e0;
-    color: black;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.875rem;
-  }
-  
-  .submit-button:hover {
-    background-color: #1565c0;
-  }
-  
-  .cancel-button:hover {
-    background-color: #d6d6d6;
-  }
-  
-  .app-container .search {
-    background: white !important;
-    border-radius: 10px;
-    padding: 5px;
-  }
+  margin: 0;
+  font-family: "Roboto", "Arial", sans-serif;
+  background-color: #f5f5f5;
+  overflow: hidden;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Header */
+.header {
+  z-index: 10;
+}
+
+.header .MuiToolbar-root {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1C2833;
+}
+
+.header-title {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.search {
+  background: white !important;
+  border-radius: 10px;
+  padding: 5px;
+}
+
+
+/************************/
+
+
+.post-container {
+  flex: 1;
+  overflow-y: auto;
+  background-color: #f5f5f5;
+  margin: 10px;
+}
+
+.post-container .createpost-button {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background-color: #1C2833;
+}
+
+
+.post-card {
+  margin-bottom:10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+}
+
+.post-card .MuiTypography-h6 {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.post-card .MuiTypography-body2 {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.post-actions {
+  padding-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.post-actions .MuiIconButton-root {
+  padding: 5px;
+}
+
+.post-actions .MuiTypography-root {
+  margin-left: 5px;
+  font-size: 0.875rem;
+}
+
+.comments-container {
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.comments-list {
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.comment-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 5px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.comment-item:last-child {
+  border-bottom: none;
+}
+
+.comment-item .MuiAvatar-root {
+  width: 40px;
+  height: 40px;
+  font-size: 1rem;
+  background-color: #1C2833;
+  color: white;
+  margin-right: 10px;
+}
+
+.comment-item .comment-author {
+  font-weight: bold;
+}
+
+.comment-item .comment-time {
+  font-size: 0.75rem;
+  color: gray;
+}
+
+.comment-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.comment-input .MuiTextField-root {
+  flex: 1;
+  font-size: 0.875rem;
+}
+
+.comment-input .MuiButton-root {
+  height: 40px;
+  font-size: 0.875rem;
+}
+
+.modal-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  background-color: #fff;
+  box-shadow: 24px 24px 24px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.submit-button {
+  background-color: #1C2833;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.cancel-button {
+  background-color: #e0e0e0;
+  color: black;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.submit-button:hover {
+  background-color: #1C2833;
+}
+
+.cancel-button:hover {
+  background-color: #d6d6d6;
+}
+
+.delete-button {
+  background-color: #1C2833;
+  /* Kırmızı renk */
+  color: white;
+  /* Beyaz metin */
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.delete-button:hover {
+  background-color: #566573;
+  /* Daha koyu kırmızı */
+}
+
+.container {
+  display: flex;
+  height: calc(100vh - 64px);
+  /* Tam ekran yüksekliği */
+}
+
+.sidebar-left,
+.sidebar-right {
+  width: 20%;
+  background-color: #f4f4f4;
+  padding: 10px;
+}
+
+
+.sidebar-left {
+  text-align: center;
+}
+
+.sidebar-right {
+  text-align: center;
+}

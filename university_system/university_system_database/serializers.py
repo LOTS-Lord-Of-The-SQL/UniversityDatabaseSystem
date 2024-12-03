@@ -98,6 +98,12 @@ class ReservationSerializer(serializers.ModelSerializer):
         model = Reservation
         fields = '__all__'
 
+# Reservation Serializer
+class ReservationAreaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReservationArea
+        fields = '__all__'
+
 # Likes Serializer
 class LikesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -111,7 +117,13 @@ class ShareSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 # Teaches Serializer
-class TeachesSerializer(serializers.ModelSerializer):
+class TeachSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Teaches
+        model = Teach
+        fields = '__all__'
+
+# Community Serializer
+class CommunityAnnouncemenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CommunityAnnouncement
         fields = '__all__'
