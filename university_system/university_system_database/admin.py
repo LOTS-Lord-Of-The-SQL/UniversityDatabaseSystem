@@ -1,5 +1,22 @@
 from django.contrib import admin
-from .models import User, Student, Instructor, Post, Comments, Courses, CourseEnrollment, Community, CommunityJoin, Facilities, ActivityArea, ReservationArea, Likes, Share, Teach,CommunityAnnouncement
+from .models import (
+    User,
+    Student,
+    Instructor,
+    Post,
+    Comments,
+    Courses,
+    CourseEnrollment,
+    Community,
+    CommunityJoin,
+    Facilities,
+    ActivityArea,
+    ReservationArea,
+    Likes,
+    Share,
+    Teach,
+    CommunityAnnouncement,
+)
 
 # Modellerinizi admin paneline kaydedin
 admin.site.register(User)

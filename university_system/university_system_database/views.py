@@ -23,14 +23,14 @@ class LoginPageView(APIView):
 
 class ListNonEnrolledCoursesView(APIView):
     def post(self, request, *args, **kwargs):
-        user_id = request.data.get("id")  
+        user_id = request.data.get("id")
         if not user_id:
             return Response(
                 {"error": "ID is required."}, status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
-            user = User.objects.get(id=user_id) 
+            user = User.objects.get(id=user_id)
         except User.DoesNotExist:
             return Response(
                 {"error": "User not found."}, status=status.HTTP_404_NOT_FOUND
@@ -56,14 +56,14 @@ class ListNonEnrolledCoursesView(APIView):
 
 class ListCoursesView(APIView):
     def post(self, request, *args, **kwargs):
-        user_id = request.data.get("id")  
+        user_id = request.data.get("id")
         if not user_id:
             return Response(
                 {"error": "ID is required."}, status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
-            user = User.objects.get(id=user_id)  
+            user = User.objects.get(id=user_id)
         except User.DoesNotExist:
             raise NotFound("Bu ID'ye sahip bir kullanıcı bulunamadı.")
         enrolled_courses = CourseEnrollment.objects.filter(user=user).select_related(
@@ -171,7 +171,7 @@ class PostDetailView(APIView):
             comments_data.append(
                 {
                     "comment_id": comment.id,
-                    "content": comment.context, 
+                    "content": comment.context,
                     "created_at": comment.created_at,
                     "owner": {
                         "user_id": comment.owner.id,
@@ -186,9 +186,9 @@ class PostDetailView(APIView):
         return Response(
             {
                 "post": post_serializer.data,
-                "comments": comments_data,  
+                "comments": comments_data,
                 "likes": likes_serializer.data,
-                "post_owner": post_owner_data, 
+                "post_owner": post_owner_data,
             },
             status=status.HTTP_200_OK,
         )
@@ -200,7 +200,7 @@ class CreatePostView(APIView):
         course_id = request.data.get("course_id")
         header = request.data.get("header")
         post_description = request.data.get("post_description")
-        is_official = request.data.get("is_official", False)  
+        is_official = request.data.get("is_official", False)
         user = User.objects.filter(id=user_id).first()
         course = Courses.objects.filter(course_id=course_id).first()
         if not user:
@@ -256,7 +256,7 @@ class JoinCommunityView(APIView):
     def post(self, request, *args, **kwargs):
         community_id = request.data.get("community_id")
         user_id = request.data.get("user_id")
-        position = request.data.get("position", "Member")  
+        position = request.data.get("position", "Member")
         try:
             community = Community.objects.get(community_id=community_id)
         except Community.DoesNotExist:
@@ -335,7 +335,7 @@ class ListJoinedCommunitiesView(APIView):
             {
                 "community_id": join.community.community_id,
                 "community_name": join.community.community_name,
-                "user_role": join.position,  
+                "user_role": join.position,
             }
             for join in joined_communities
         ]
@@ -466,9 +466,9 @@ class ListLikesView(APIView):
 def OfficialPostsView(request):
     admin_users = User.objects.filter(role="admin")
     posts = Post.objects.filter(
-        owner__in=admin_users,  
-        owner_course__isnull=True,  
-        is_official=True,  
+        owner__in=admin_users,
+        owner_course__isnull=True,
+        is_official=True,
     )
     response_data = []
     for post in posts:
@@ -503,7 +503,7 @@ class RemoveLikeView(APIView):
             )
         try:
             like = Likes.objects.get(post=post, owner=user)
-            like.delete()  
+            like.delete()
             return Response(
                 {"message": "Like removed successfully."}, status=status.HTTP_200_OK
             )
@@ -516,7 +516,7 @@ class RemoveLikeView(APIView):
 
 class RemovePostView(APIView):
     def post(self, request, *args, **kwargs):
-        post_id = request.data.get("post_id") 
+        post_id = request.data.get("post_id")
 
         try:
             post = Post.objects.get(post_id=post_id)
@@ -541,9 +541,7 @@ class RemovePostView(APIView):
 
 class ListEmptyActivityAreas(APIView):
     def post(self, request, *args, **kwargs):
-        facilities_id = request.data.get(
-            "facilities_id"
-        ) 
+        facilities_id = request.data.get("facilities_id")
         if not facilities_id:
             return Response(
                 {"error": "facilities_id is required."},
@@ -691,14 +689,12 @@ class CommunityAnnouncementsView(APIView):
             ).first()
             head_username = None
             if community_head:
-                head_username = (
-                    community_head.user.username
-                ) 
+                head_username = community_head.user.username
             serializer = CommunityAnnouncemenSerializer(announcements, many=True)
             return Response(
                 {
                     "announcements": serializer.data,
-                    "community_head": head_username,  
+                    "community_head": head_username,
                 },
                 status=status.HTTP_200_OK,
             )
@@ -723,7 +719,7 @@ class InstructorDetailsView(APIView):
             )
         teach = get_object_or_404(Teach, course_id=course_id)
         user = teach.user
-        if user and user.role == "instructor":  
+        if user and user.role == "instructor":
             data = {
                 "department": user.department,
                 "room": user.room,
@@ -815,25 +811,30 @@ class CreateCommunityAnnouncementView(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
-    
+
+
 class DeleteCommunityAnnouncementView(APIView):
     def post(self, request):
         announcement_id = request.data.get("announcement_id")
         if not announcement_id:
             return Response(
                 {"error": "announcement_id is required."},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
-            announcement = CommunityAnnouncement.objects.get(announcement_id=announcement_id)
-            announcement.delete()  
+            announcement = CommunityAnnouncement.objects.get(
+                announcement_id=announcement_id
+            )
+            announcement.delete()
             return Response(
-                {"success": f"Announcement with ID {announcement_id} deleted successfully!"},
-                status=status.HTTP_200_OK
+                {
+                    "success": f"Announcement with ID {announcement_id} deleted successfully!"
+                },
+                status=status.HTTP_200_OK,
             )
         except CommunityAnnouncement.DoesNotExist:
             return Response(
                 {"error": f"Announcement with ID {announcement_id} not found."},
-                status=status.HTTP_404_NOT_FOUND
+                status=status.HTTP_404_NOT_FOUND,
             )

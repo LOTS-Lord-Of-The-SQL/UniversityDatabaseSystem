@@ -1,52 +1,69 @@
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
     ROLE_CHOICES = [
-        ('student', 'Student'),
-        ('instructor', 'Instructor'),
-        ('admin', 'Admin'),
+        ("student", "Student"),
+        ("instructor", "Instructor"),
+        ("admin", "Admin"),
     ]
     role = models.CharField(max_length=50, choices=ROLE_CHOICES)
     department = models.CharField(max_length=100, blank=True, null=True)
-    cafeteria_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    cafeteria_balance = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.00
+    )
     profile_photo_path = models.CharField(max_length=255, blank=True, null=True)
     birthday = models.DateField(blank=True, null=True)
     location = models.CharField(max_length=255, blank=True, null=True)
     phone_number = models.CharField(max_length=11, blank=True, null=True)
-    scholarship_rate = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True)
+    scholarship_rate = models.DecimalField(
+        max_digits=3, decimal_places=2, null=True, blank=True
+    )
     gpa = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True)
     room = models.CharField(max_length=8, blank=True, null=True)
     room_phone_num = models.CharField(max_length=11, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}" 
-    
+        return f"{self.first_name} {self.last_name}"
+
 
 # Community Model
 class Community(models.Model):
     community_id = models.AutoField(primary_key=True)
     community_name = models.CharField(max_length=255)
-    
+
+
 class CommunityAnnouncement(models.Model):
     announcement_id = models.AutoField(primary_key=True)
-    owner_community = models.ForeignKey(Community, on_delete=models.SET_NULL, null=True, blank=True)
+    owner_community = models.ForeignKey(
+        Community, on_delete=models.SET_NULL, null=True, blank=True
+    )
     annoucement_description = models.TextField()
     header = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
 
+
 # Student Model
 class Student(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, limit_choices_to={'role': 'student'})
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        limit_choices_to={"role": "student"},
+    )
     gpa = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True)
     burs = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
 
 # Instructor Model
 class Instructor(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, limit_choices_to={'role': 'instructor'})
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        limit_choices_to={"role": "instructor"},
+    )
     room = models.CharField(max_length=8, blank=True, null=True)
     room_phone_num = models.CharField(max_length=11, blank=True, null=True)
 
@@ -65,7 +82,9 @@ class Courses(models.Model):
 class Post(models.Model):
     post_id = models.AutoField(primary_key=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    owner_course = models.ForeignKey(Courses, on_delete=models.SET_NULL, null=True, blank=True)
+    owner_course = models.ForeignKey(
+        Courses, on_delete=models.SET_NULL, null=True, blank=True
+    )
     is_official = models.BooleanField(default=False)
     post_description = models.TextField()
     header = models.CharField(max_length=255)
@@ -80,15 +99,13 @@ class Comments(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-
 # Course Enrollment Model
 class CourseEnrollment(models.Model):
     course = models.ForeignKey(Courses, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
-        unique_together = ('course', 'user')
-
+        unique_together = ("course", "user")
 
 
 # Community Join Model
@@ -98,7 +115,7 @@ class CommunityJoin(models.Model):
     position = models.CharField(max_length=50)
 
     class Meta:
-        unique_together = ('community', 'user')
+        unique_together = ("community", "user")
 
 
 # Facilities Model
@@ -113,8 +130,9 @@ class ActivityArea(models.Model):
     room_id = models.AutoField(primary_key=True)
     capacity = models.IntegerField()
     facilities = models.ForeignKey(Facilities, on_delete=models.CASCADE)
-    room_name = models.CharField(max_length=50,null=True, blank=True, default=None)
+    room_name = models.CharField(max_length=50, null=True, blank=True, default=None)
     is_empty = models.BooleanField(default=True)
+
 
 class ReservationArea(models.Model):
     activity_area = models.ForeignKey(ActivityArea, on_delete=models.CASCADE)
@@ -122,16 +140,17 @@ class ReservationArea(models.Model):
     date = models.DateTimeField()
 
     class Meta:
-        unique_together = ('activity_area', 'reserve_user', 'date')
+        unique_together = ("activity_area", "reserve_user", "date")
+
 
 # Reservation Model
-class Reservation(models.Model): # iptall bunun yerine yukardaki kullanılacak
+class Reservation(models.Model):  # iptall bunun yerine yukardaki kullanılacak
     facility = models.ForeignKey(Facilities, on_delete=models.CASCADE)
     reserve_user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField()
 
     class Meta:
-        unique_together = ('facility', 'reserve_user', 'date')
+        unique_together = ("facility", "reserve_user", "date")
 
 
 # Likes Model
@@ -140,7 +159,7 @@ class Likes(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
-        unique_together = ('post', 'owner')
+        unique_together = ("post", "owner")
 
 
 # Share Model
@@ -149,12 +168,14 @@ class Share(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
-        unique_together = ('post', 'owner')
+        unique_together = ("post", "owner")
 
 
 class Teach(models.Model):
     course = models.ForeignKey(Courses, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, default=None)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True, blank=True, default=None
+    )
 
     class Meta:
-        unique_together = ('course', 'user')
+        unique_together = ("course", "user")
