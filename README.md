@@ -22,3 +22,4 @@ We’re incredibly proud of what we’ve accomplished and are grateful to our in
 📷 Check out some screenshots of our platform below!
 
 https://www.linkedin.com/posts/omer-ilbilgi_databasesystems-teamwork-frontenddevelopment-activity-7294107290612199424-ZYNV?utm_source=share&utm_medium=member_desktop&rcm=ACoAADHvgMYB2mxWW3zjyrR6-4xffuQ8gGw0bVI
+
